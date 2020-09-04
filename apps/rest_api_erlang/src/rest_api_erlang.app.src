@@ -1,0 +1,18 @@
+{application, rest_api_erlang,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {rest_api_erlang_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    cowboy,
+    lager,
+    erlcloud
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.

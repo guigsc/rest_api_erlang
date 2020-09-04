@@ -1,0 +1,6 @@
+-sname rest_api_erlang
+
+-setcookie rest_api_erlang_cookie
+
++K true
++A30

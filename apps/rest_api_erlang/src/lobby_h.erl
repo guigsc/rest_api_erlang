@@ -30,6 +30,7 @@ resource_exists(Req0=#{method := <<"DELETE">>}, State) ->
 		{ok, IsPlayerInLobby} ->
 			{IsPlayerInLobby, Req0, State};
 		{error, Message} ->
+			lager:error("Resource could not be fetched ~p", [Message]),
 			Req = cowboy_req:set_resp_body(jsx:encode([Message]), Req0),
 			{false, Req, State}
 	end;
@@ -55,14 +56,18 @@ post(Req, State) ->
 			erlcloud_ddb2:put_item(<<"lobby">>, Data),
 			{true, Req, State};
 		{error, Message} ->
+			lager:error("Resource could not be created ~p", [Message]),
 			Req1 = cowboy_req:set_resp_body(jsx:encode([Message]), Req),
 			{false, Req1, State}
 	end.
 
 get(Req0, State) ->
-	{ok, Data} = erlcloud_ddb2:scan(<<"lobby">>),
-	JsonData = jsx:encode(Data),
-	{JsonData, Req0, State}.	
+	case erlcloud_ddb2:scan(<<"lobby">>) of 
+		{ok, Data} ->
+			{jsx:encode(Data), Req0, State};
+		{error, Message} ->
+			{jsx:encode([Message]), Req0, State}	
+	end.
 
 delete_resource(Req, State) -> 
 	#{player_id := PlayerId} = cowboy_req:match_qs([{player_id, [], undefined}], Req),
@@ -70,6 +75,7 @@ delete_resource(Req, State) ->
 		{ok, _} -> 
 			{true, Req, State};
 		{error, Message} ->
+			lager:error("Resource could not be deleted ~p", [Message]),
 			Req1 = cowboy_req:reply(400,
 				#{<<"content-type">> => <<"application/json">>},
 				jsx:encode([Message]),
